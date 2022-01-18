@@ -15,7 +15,7 @@ const Container = styled(Box)`
   background: #F4F7FE;
 `
 
-const Batch = styled(Box)`
+const Badge = styled(Box)`
   width: 60px;
   height: 60px;
   font-size: 0.5rem;
@@ -46,13 +46,13 @@ export const Home = () => {
   const draggableRef = useRef(false)
   const isDragRef = useRef(false)
   const [nameText, setNameText] = useState('')
-  const [horseBatches, setHorseBatches] = useState({})
+  const [horseBadges, setHorseBadges] = useState({})
 
   useEffect(() => {
     let obj = {}
     db.collection("horses").orderBy(`createdAt`).onSnapshot((snapshot) => {
       snapshot.docChanges().map((collections) => (obj[collections.doc.id] = collections.doc.data()))
-      setHorseBatches(obj)
+      setHorseBadges(obj)
     })
   }, [])
 
@@ -63,12 +63,12 @@ export const Home = () => {
   const onStop = async(_event, data, key) => {
     if (isDragRef.current) {
       const newObject = {
-        name: horseBatches[key].name,
+        name: horseBadges[key].name,
         x: data.x,
         y: data.y,
         editMode: false,
       }
-      setHorseBatches({ ...horseBatches, [key]: newObject })
+      setHorseBadges({ ...horseBadges, [key]: newObject })
       await db.collection("horses").doc(key).update(newObject).then(() => {
         // pass
       }).catch((error) => {
@@ -78,9 +78,9 @@ export const Home = () => {
     isDragRef.current = false
   }
 
-  const createBatch = () => {
-    const batchesLength = Object.keys(horseBatches).length
-    if (batchesLength < 18) {
+  const createBadge = () => {
+    const badgesesLength = Object.keys(horseBadges).length
+    if (badgesesLength < 18) {
       const newHorseData = {
         name: 'うま',
         x: 0,
@@ -89,7 +89,7 @@ export const Home = () => {
         createdAt: firebase.firestore.Timestamp.fromDate(new Date())
       }
       db.collection("horses").add(newHorseData).then((docRef) => {
-        setHorseBatches({ ...horseBatches, [docRef.id]: newHorseData })
+        setHorseBadges({ ...horseBadges, [docRef.id]: newHorseData })
       }).catch((error) => {
         console.error("error: ", error)
       })
@@ -98,23 +98,23 @@ export const Home = () => {
 
   const editModeOn = (key) => {
     const newObject = {
-      name: horseBatches[key].name,
-      x: horseBatches[key].x,
-      y: horseBatches[key].y,
+      name: horseBadges[key].name,
+      x: horseBadges[key].x,
+      y: horseBadges[key].y,
       editMode: true,
     }
-    setHorseBatches({ ...horseBatches, [key]: newObject })
-    setNameText(horseBatches[key].name)
+    setHorseBadges({ ...horseBadges, [key]: newObject })
+    setNameText(horseBadges[key].name)
   }
 
   const editModeOff = async(key) => {
     const newObject = {
       name: nameText,
-      x: horseBatches[key].x,
-      y: horseBatches[key].y,
+      x: horseBadges[key].x,
+      y: horseBadges[key].y,
       editMode: false,
     }
-    setHorseBatches({ ...horseBatches, [key]: newObject })
+    setHorseBadges({ ...horseBadges, [key]: newObject })
     setNameText('')
     await db.collection("horses").doc(key).update(newObject).then(() => {
       // pass
@@ -130,11 +130,11 @@ export const Home = () => {
 
   return (
     <Container>
-      <IconButton color="primary" onClick={createBatch}>
+      <IconButton color="primary" onClick={createBadge}>
         <AddCircleOutlineIcon />
       </IconButton>
       <Grid container>
-        {Object.entries(horseBatches).map(([key, horseData]) => {
+        {Object.entries(horseBadges).map(([key, horseData]) => {
           return (
             <Draggable
               key={key}
@@ -146,12 +146,12 @@ export const Home = () => {
               onDrag={onDrag}
               onStop={(event, data) => onStop(event, data, key)}
             >
-              <Batch
+              <Badge
                 ref={isDragRef}
                 onDoubleClick={() => editModeOn(key)}
                 style={{ background: horseData.editMode ? '#4D98FF' : '#1A1667' }}
               >
-                {horseBatches[key].editMode ? (
+                {horseBadges[key].editMode ? (
                   <StyledInput
                     disableUnderline
                     fullWidth
@@ -164,7 +164,7 @@ export const Home = () => {
                 ) : (
                     <HorseName>{horseData.name}</HorseName>
                 ) }
-              </Batch>
+              </Badge>
             </Draggable>
           )
         })}
