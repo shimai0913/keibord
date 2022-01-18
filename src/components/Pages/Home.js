@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import Draggable from 'react-draggable'
 import firebase from 'firebase/compat/app'
-import { orderBy } from "firebase/firestore";
 import { db } from 'common/Firebase'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
@@ -52,11 +51,7 @@ export const Home = () => {
   useEffect(() => {
     let obj = {}
     db.collection("horses").orderBy(`createdAt`).onSnapshot((snapshot) => {
-      snapshot.docChanges().map((collections) => {
-        const docId = collections.doc.id
-        const data = collections.doc.data()
-        obj[docId] = data
-      })
+      snapshot.docChanges().map((collections) => (obj[collections.doc.id] = collections.doc.data()))
       setHorseBatches(obj)
     })
   }, [])
