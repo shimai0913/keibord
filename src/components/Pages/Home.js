@@ -49,9 +49,11 @@ export const Home = () => {
   const [horseBadges, setHorseBadges] = useState({})
 
   useEffect(() => {
-    let obj = {}
     db.collection("horses").orderBy(`createdAt`).onSnapshot((snapshot) => {
-      snapshot.docChanges().map((collections) => (obj[collections.doc.id] = collections.doc.data()))
+      let obj = {}
+      snapshot.forEach((doc) => {
+        obj[doc.id] = doc.data()
+      })
       setHorseBadges(obj)
     })
   }, [])
