@@ -1,14 +1,14 @@
 import { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import Draggable from 'react-draggable'
+import firebase from 'firebase/compat/app'
+import { orderBy } from "firebase/firestore";
+import { db } from 'common/Firebase'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Input from '@mui/material/Input'
 import IconButton from '@mui/material/IconButton'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
-import * as React from 'react'
-import { db } from 'common/Firebase'
-// import { collection, getDocs } from 'firebase/firestore'
 
 const Container = styled(Box)`
   witdh: ${document.documentElement.clientWidth}px;
@@ -51,7 +51,7 @@ export const Home = () => {
 
   useEffect(() => {
     let obj = {}
-    db.collection("horses").onSnapshot((snapshot) => {
+    db.collection("horses").orderBy(`createdAt`).onSnapshot((snapshot) => {
       snapshot.docChanges().map((collections) => {
         const docId = collections.doc.id
         const data = collections.doc.data()
@@ -91,6 +91,7 @@ export const Home = () => {
         x: 0,
         y: 0,
         editMode: false,
+        createdAt: firebase.firestore.Timestamp.fromDate(new Date())
       }
       db.collection("horses").add(newHorseData).then((docRef) => {
         setHorseBatches({ ...horseBatches, [docRef.id]: newHorseData })
