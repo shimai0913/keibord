@@ -13,7 +13,5 @@ const config = {
   databaseURL: process.env.REACT_APP_DATABASE_URL,
 }
 
-console.log('config:', config)
-
 export const firebaseApp = firebase.initializeApp(config)
 export const db = firebaseApp.firestore()
