@@ -1,7 +1,7 @@
 ---
 name: Feature request
 about: Suggest an idea for this project
-title: 'issue: <num>'
+title: 'issue: 00'
 labels: ''
 assignees: ''
 
