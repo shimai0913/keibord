@@ -1,0 +1,32 @@
+{
+    "env": {
+        "browser": true,
+        "es2021": true
+    },
+    "extends": [
+        "plugin:react/recommended",
+        "standard"
+    ],
+    "parserOptions": {
+        "ecmaFeatures": {
+            "jsx": true
+        },
+        "ecmaVersion": 13,
+        "sourceType": "module"
+    },
+    "plugins": [
+        "react"
+    ],
+    "rules": {
+        "indent": ["error", 2],
+        "no-var": "error",
+        "no-multiple-empty-lines": ["error" , {"max": 1}],
+        "no-trailing-spaces": "error",
+        "space-infix-ops": "error",
+        "dot-notation": "error",
+        "eqeqeq": "error",
+        "arrow-spacing": "error",
+        "no-console": ["error", { "allow": ["warn", "error"] }],
+        "multiline-ternary": "off"
+    }
+}
