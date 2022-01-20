@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import Draggable from 'react-draggable'
 import firebase from 'firebase/compat/app'
@@ -49,8 +49,8 @@ export const Home = () => {
   const [horseBadges, setHorseBadges] = useState({})
 
   useEffect(() => {
-    db.collection("horses").orderBy(`createdAt`).onSnapshot((snapshot) => {
-      let obj = {}
+    db.collection('horses').orderBy('createdAt').onSnapshot((snapshot) => {
+      const obj = {}
       snapshot.forEach((doc) => {
         obj[doc.id] = doc.data()
       })
@@ -62,19 +62,19 @@ export const Home = () => {
     isDragRef.current = true
   }
 
-  const onStop = async(_event, data, key) => {
+  const onStop = async (_event, data, key) => {
     if (isDragRef.current) {
       const newObject = {
         name: horseBadges[key].name,
         x: data.x,
         y: data.y,
-        editMode: false,
+        editMode: false
       }
       setHorseBadges({ ...horseBadges, [key]: newObject })
-      await db.collection("horses").doc(key).update(newObject).then(() => {
+      await db.collection('horses').doc(key).update(newObject).then(() => {
         // pass
       }).catch((error) => {
-        console.error("error: ", error)
+        console.error('error: ', error)
       })
     }
     isDragRef.current = false
@@ -90,10 +90,10 @@ export const Home = () => {
         editMode: false,
         createdAt: firebase.firestore.Timestamp.fromDate(new Date())
       }
-      db.collection("horses").add(newHorseData).then((docRef) => {
+      db.collection('horses').add(newHorseData).then((docRef) => {
         setHorseBadges({ ...horseBadges, [docRef.id]: newHorseData })
       }).catch((error) => {
-        console.error("error: ", error)
+        console.error('error: ', error)
       })
     }
   }
@@ -103,25 +103,25 @@ export const Home = () => {
       name: horseBadges[key].name,
       x: horseBadges[key].x,
       y: horseBadges[key].y,
-      editMode: true,
+      editMode: true
     }
     setHorseBadges({ ...horseBadges, [key]: newObject })
     setNameText(horseBadges[key].name)
   }
 
-  const editModeOff = async(key) => {
+  const editModeOff = async (key) => {
     const newObject = {
       name: nameText,
       x: horseBadges[key].x,
       y: horseBadges[key].y,
-      editMode: false,
+      editMode: false
     }
     setHorseBadges({ ...horseBadges, [key]: newObject })
     setNameText('')
-    await db.collection("horses").doc(key).update(newObject).then(() => {
+    await db.collection('horses').doc(key).update(newObject).then(() => {
       // pass
     }).catch((error) => {
-      console.error("error: ", error)
+      console.error('error: ', error)
     })
   }
 
@@ -132,7 +132,7 @@ export const Home = () => {
 
   return (
     <Container>
-      <IconButton color="primary" onClick={createBadge}>
+      <IconButton color='primary' onClick={createBadge}>
         <AddCircleOutlineIcon />
       </IconButton>
       <Grid container>
@@ -143,7 +143,7 @@ export const Home = () => {
               ref={draggableRef}
               position={{
                 x: horseData.x,
-                y: horseData.y,
+                y: horseData.y
               }}
               onDrag={onDrag}
               onStop={(event, data) => onStop(event, data, key)}
@@ -164,8 +164,8 @@ export const Home = () => {
                     onBlur={() => editModeOff(key)}
                   />
                 ) : (
-                    <HorseName>{horseData.name}</HorseName>
-                ) }
+                  <HorseName>{horseData.name}</HorseName>
+                )}
               </Badge>
             </Draggable>
           )
