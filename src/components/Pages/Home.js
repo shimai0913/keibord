@@ -4,8 +4,11 @@ import Draggable from 'react-draggable'
 import firebase from 'firebase/compat/app'
 import { db } from 'common/Firebase'
 import { bordWidth, bordHeight, badgeSize } from 'common/theme/index'
+import FieldImg from 'images/fieldImage.png'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
+import Card from '@mui/material/Card'
+import CardMedia from '@mui/material/CardMedia'
 import Input from '@mui/material/Input'
 import IconButton from '@mui/material/IconButton'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
@@ -162,6 +165,12 @@ export const Home = () => {
 
   return (
     <Container>
+      <Card>
+        <CardMedia
+          component='img'
+          image={FieldImg}
+        />
+      </Card>
       <IconButton color='primary' onClick={createBadge}>
         <AddCircleOutlineIcon />
       </IconButton>
