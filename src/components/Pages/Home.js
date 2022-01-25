@@ -3,21 +3,27 @@ import styled from 'styled-components'
 import Draggable from 'react-draggable'
 import firebase from 'firebase/compat/app'
 import { db } from 'common/Firebase'
+import { bordWidth, bordHeight, badgeSize } from 'common/theme/index'
+import FieldImg from 'images/fieldImage.png'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
+import Card from '@mui/material/Card'
+import CardMedia from '@mui/material/CardMedia'
 import Input from '@mui/material/Input'
 import IconButton from '@mui/material/IconButton'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 
 const Container = styled(Box)`
-  witdh: ${document.documentElement.clientWidth}px;
-  height: ${document.documentElement.clientHeight}px;
+  witdh: ${bordWidth}px;
+  height: ${bordHeight}px;
   background: #F4F7FE;
+  position: relative;
 `
 
 const Badge = styled(Box)`
-  width: 60px;
-  height: 60px;
+  width: ${badgeSize}px;
+  height: ${badgeSize}px;
   font-size: 0.5rem;
   color: #fff;
   // background: #1A1667;
@@ -27,7 +33,6 @@ const Badge = styled(Box)`
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  position: relative;
 `
 
 const HorseName = styled.div`
@@ -40,6 +45,17 @@ const StyledInput = styled(Input)`
   & input {
     text-align: center;
   }
+`
+
+const TrashArea = styled(Box)`
+  width: ${bordWidth * 0.1}px;
+  height: ${bordWidth * 0.1}px;
+  padding: 1rem;
+  border: 1px dashed #000;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  display: flex;
 `
 
 export const Home = () => {
@@ -62,22 +78,39 @@ export const Home = () => {
     isDragRef.current = true
   }
 
-  const onStop = async (_event, data, key) => {
+  const onStop = async (event, data, key) => {
     if (isDragRef.current) {
-      const newObject = {
-        name: horseBadges[key].name,
-        x: data.x,
-        y: data.y,
-        editMode: false
+      if (onRemove(event.x, event.y)) {
+        deleteBadge(key)
+      } else {
+        const newObject = {
+          name: horseBadges[key].name,
+          x: data.x,
+          y: data.y,
+          editMode: false
+        }
+        setHorseBadges({ ...horseBadges, [key]: newObject })
+        await db.collection('horses').doc(key).update(newObject).then(() => {
+          // pass
+        }).catch((error) => {
+          console.error('error: ', error)
+        })
       }
-      setHorseBadges({ ...horseBadges, [key]: newObject })
-      await db.collection('horses').doc(key).update(newObject).then(() => {
-        // pass
-      }).catch((error) => {
-        console.error('error: ', error)
-      })
     }
     isDragRef.current = false
+  }
+
+  const onRemove = (x, y) => {
+    if (Math.floor(bordWidth * 0.9) - (badgeSize / 2) < x) {
+      if (Math.floor(bordHeight - (bordWidth * 0.1)) - (badgeSize / 2) < y) {
+        return true
+      }
+    }
+    return false
+  }
+
+  const deleteBadge = (key) => {
+    db.collection('horses').doc(key).delete()
   }
 
   const createBadge = () => {
@@ -132,6 +165,12 @@ export const Home = () => {
 
   return (
     <Container>
+      <Card>
+        <CardMedia
+          component='img'
+          image={FieldImg}
+        />
+      </Card>
       <IconButton color='primary' onClick={createBadge}>
         <AddCircleOutlineIcon />
       </IconButton>
@@ -171,6 +210,9 @@ export const Home = () => {
           )
         })}
       </Grid>
+      <TrashArea component='span'>
+        <DeleteOutlineIcon color='primary' fontSize='large' sx={{ m: 'auto' }} />
+      </TrashArea>
     </Container>
   )
 }

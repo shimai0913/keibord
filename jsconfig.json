@@ -4,7 +4,8 @@
     "baseUrl": "./src",
     "paths": {
       "components/*": ["/components/*"],
-      "common/*": ["/common/*"]
+      "common/*": ["/common/*"],
+      "images/*": ["/images/*"]
     }
   },
   "exclude": ["node_modules", "dist"]
