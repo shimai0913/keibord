@@ -4,11 +4,11 @@ import BgImg from 'images/room_background.jpg'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import CardMedia from '@mui/material/CardMedia'
-import TextField from '@mui/material/TextField'
 import { bordWidth, bordHeight } from 'common/theme/index'
-import Typography from '@mui/material/Typography'
-import Stack from '@mui/material/Stack'
+import { db } from 'common/Firebase'
+import firebase from 'firebase/compat/app'
 import Button from '@mui/material/Button'
+import Grid from '@mui/material/Grid'
 const Container = styled(Box)`
   witdh: ${bordWidth}px;
   height: ${bordHeight}px;
@@ -25,34 +25,18 @@ const StyledCard = styled(Card)`
   left: 42%;
   padding: 2rem;
 `
-const StyledStack = styled(Stack)`
-  margin-top: 1rem;
-`
-const ErrTypography = styled(Typography)`
-  color: red;
-`
-
-
 export const Top = () => {
-  const [roomId, setRoomId] = useState('')
-  const [errMessage, setErrMessage] = useState('')
-  const valChange = (e) => {
-    const val = e.target.value
-    setRoomId(val)
-  }
-  const clearRoomId = () => {
-    setRoomId('')
-    setErrMessage('')
-  }
-  const decisionRoomId = () => {
-    const regex = /^\d{6}$/
-    const result = regex.test(roomId)
-    if (result) {
-      //  validation通過
-      setErrMessage('')
-    } else {
-      setErrMessage('6桁半角数字で設定してください。')
-    }
+  const [viewRoomId, setViewRoomId] = useState('')
+  const createRoom = () => {
+    let roomId = '000000'
+    db.collection('rooms').limit(1).orderBy('createdAt', 'desc').get().then((querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+        roomId = Number(doc.id) + 1
+        roomId = ('000000' + roomId).slice(-6)
+      })
+      db.collection('rooms').doc(roomId).set({ createdAt: firebase.firestore.Timestamp.fromDate(new Date()) })
+      setViewRoomId(`ルームID${roomId}でルームを作成しました。`)
+    })
   }
   return (
     <Container>
@@ -63,13 +47,8 @@ export const Top = () => {
         />
       </Card>
       <StyledCard>
-        <Typography>ルーム作成<br />6桁のルームIDを設定してください</Typography>
-        <TextField value={roomId} inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} onChange={valChange} label={'ルームID'} margin="dense" />
-        <ErrTypography>{errMessage}</ErrTypography>
-        <StyledStack spacing={2} direction="row">
-          <Button variant="outlined" onClick={clearRoomId}>クリア</Button>
-          <Button variant="contained" onClick={decisionRoomId}>作成</Button>
-        </StyledStack>
+        <Grid>{viewRoomId}</Grid>
+        <Button variant="contained" onClick={createRoom}>ルーム作成</Button>
       </StyledCard>
     </Container>
   )
