@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import BgImg from 'images/horse.jpg'
 import Box from '@mui/material/Box'
@@ -66,6 +67,7 @@ export const Top = () => {
         roomId = ('000000' + roomId).slice(-6)
       })
       db.collection('rooms').doc(roomId).set({ createdAt: firebase.firestore.Timestamp.fromDate(new Date()) })
+      db.collection('rooms').doc(roomId).collection('houses').doc('houses').set({ createdAt: firebase.firestore.Timestamp.fromDate(new Date()) })
       setViewRoomId(`ルームID${roomId}でルームを作成しました。`)
     })
   }
@@ -94,8 +96,10 @@ export const Top = () => {
     setErrFlag(false)
     setDisabledFlag(true)
   }
-  const decisionRoomId = () => {
-  }
+  // const to = {
+  //   pathname: '/room',
+  //   state: { data: roomId }
+  // }
   return (
     <Container>
       <Card>
@@ -131,14 +135,18 @@ export const Top = () => {
             onClick={clearRoomId}>
             クリア
           </EntryRoomButton>
-          <EntryRoomButton
-            variant="contained"
-            color="success"
-            startIcon={<LoginIcon />}
-            disabled={Boolean(disabledFlag)}
-            onClick={decisionRoomId}>
-            入室
-          </EntryRoomButton>
+          <Link to={{
+            pathname: '/room',
+            state: { key: roomId }
+          }}>
+            <EntryRoomButton
+              variant="contained"
+              color="success"
+              startIcon={<LoginIcon />}
+              disabled={Boolean(disabledFlag)}>
+              入室
+            </EntryRoomButton>
+          </Link>
         </EnterRoomGrid>
       </FixedGrid>
     </Container>
