@@ -1,154 +1,137 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
-import BgImg from 'images/horse.jpg'
-import Box from '@mui/material/Box'
-import Card from '@mui/material/Card'
-import CardMedia from '@mui/material/CardMedia'
-import { bordWidth, bordHeight } from 'common/theme/index'
-import { db } from 'common/Firebase'
 import firebase from 'firebase/compat/app'
-import Button from '@mui/material/Button'
+// common
+import { db } from 'common/Firebase'
+import { zeroPadding, sleep } from 'common/BaseFunc'
+import { screenHeight } from 'common/theme/index'
+// components
+// images
+import BgImg from 'images/horse.jpg'
+// mui
+import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
-import Alert from '@mui/material/Alert'
-import TextField from '@mui/material/TextField'
-import LoginIcon from '@mui/icons-material/Login'
-const Container = styled(Box)`
-  witdh: ${bordWidth}px;
-  height: ${bordHeight}px;
-  background: #F4F7FE;
-  position: relative;
-`
-const StyledCardMedia = styled(CardMedia)`
-  position: fixed;
+import LoadingButton from '@mui/lab/LoadingButton'
+import BedroomBabyOutlinedIcon from '@mui/icons-material/BedroomBabyOutlined'
+
+const Container = styled(Grid)`
   width: 100%;
-  filter: brightness(70%);
-  drop-shadow(3px 3px 5px #000);
-  filter: opacity(80%);
+  height: ${screenHeight}px;
+  background: #9DBCBE;
+  position: relative;
+  background-image: url(${BgImg});
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  background-size: cover;
+  z-index: 0;
+  & :before {
+    content: '';
+    background: inherit;
+    z-index: -1;
+    filter: blur(5px);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+  }
 `
-const StyledCard = styled(Card)`
-  padding: 0;
-  width: 200px;
-  box-shadow: 20px 20px 15px -10px!important;
-  margin-right: 1rem;
+
+const CenterBox = styled(Box)`
+  width: 80%;
+  height: 80%;
+  padding: 10%;
+  // padding-bottom: 30%;
+  // padding-left: 50%;
+  box-sizing: border-box;
+  border: 4px rgba(29,29,27,.15) solid;
+  box-shadow: inset 0px 2px 0px 0px rgb(255 255 255 / 15%), 0px 3px 0px 0px rgb(255 255 255 / 15%);
+  border-radius: 12px;
+  background-image: url(${BgImg});
+  background-repeat: no-repeat;
+  background-position: 100% 100%;
+  background-size: cover;
 `
-const StyledButton = styled(Button)`
-  width: 200px;
-  height: 100px;
-`
-const EntryRoomButton = styled(Button)`
-  height: 56px;
-  margin-left: 2rem!important;
-`
-const FixedGrid = styled(Grid)`
-  position: fixed;
-  top: 10%;
-  left: 55%;
-`
-const EnterRoomGrid = styled(Grid)`
-  margin-top: 2rem;
-  padding: 1rem 1rem 1rem 0;
-  border-radius: 10px;
-`
-const FlexGrid = styled(Grid)`
-  display: flex;
-`
-const StyledAlert = styled(Alert)`
-  margin-top: 3rem;
-  with: auto;
-`
+
 export const Top = () => {
-  const [viewRoomId, setViewRoomId] = useState('')
-  const createRoom = () => {
-    let roomId = '000000'
-    db.collection('rooms').limit(1).orderBy('createdAt', 'desc').get().then((querySnapshot) => {
-      querySnapshot.forEach((doc) => {
-        roomId = Number(doc.id) + 1
-        roomId = ('000000' + roomId).slice(-6)
-      })
-      db.collection('rooms').doc(roomId).set({ createdAt: firebase.firestore.Timestamp.fromDate(new Date()) })
-      db.collection('rooms').doc(roomId).collection('houses').doc('houses').set({ createdAt: firebase.firestore.Timestamp.fromDate(new Date()) })
-      setViewRoomId(`ルームID${roomId}でルームを作成しました。`)
-    })
-  }
-  const closeNotification = () => {
-    setViewRoomId('')
-  }
-  const [roomId, setRoomId] = useState('')
-  const [errFlag, setErrFlag] = useState(false)
-  const [disabledFlag, setDisabledFlag] = useState(true)
-  const valChange = (e) => {
-    const val = e.target.value
-    const regex = /^\d{6}$/
-    const result = regex.test(val)
-    if (result) {
-      //  validation通過
-      setErrFlag(false)
-      setDisabledFlag(false)
-    } else {
-      setErrFlag(true)
-      setDisabledFlag(true)
+  const roomsRef = useRef(db.collection('rooms'))
+  const [loading, setLoading] = useState(false)
+  const [roomId, setRoomId] = useState(null)
+  const navigate = useNavigate()
+
+  const createRoom = async () => {
+    try {
+      setLoading(true)
+      await sleep(3000)
+      const querySnapshot = await roomsRef.current.limit(1).orderBy('createdAt', 'desc').get()
+      const newRoomId = querySnapshot.docs.map(doc => zeroPadding(Number(doc.id) + 1, 6)).join(',')
+      const newData = {
+        open: true,
+        createdAt: firebase.firestore.Timestamp.fromDate(new Date())
+      }
+      setRoomId(newRoomId)
+      roomsRef.current.doc(newRoomId || '000001').set(newData)
+    } catch (error) {
+      console.error('error:', error)
+    } finally {
+      setLoading(false)
     }
-    setRoomId(val)
   }
-  const clearRoomId = () => {
-    setRoomId('')
-    setErrFlag(false)
-    setDisabledFlag(true)
+
+  useEffect(() => {
+    if (roomId) {
+      enterRoom(roomId)
+    }
+  }, [roomId])
+
+  const enterRoom = async (roomId) => {
+    if (!roomId) return
+    try {
+      setLoading(true)
+      const doc = await roomsRef.current.doc(roomId).get()
+      setLoading(false)
+      if (doc.exists && doc.data().open) {
+        navigate(`/Room/${roomId}`, { state: { roomId: roomId } })
+      }
+    } catch (error) {
+      console.error('error:', error)
+    }
   }
-  // const to = {
-  //   pathname: '/room',
-  //   state: { data: roomId }
-  // }
+
   return (
-    <Container>
-      <Card>
-        <StyledCardMedia
-          component='img'
-          image={BgImg}
-        />
-      </Card>
-      <FixedGrid>
-        <FlexGrid>
-          <StyledCard>
-            <StyledButton variant="contained" onClick={createRoom}>ルーム作成</StyledButton>
-          </StyledCard>
-          {viewRoomId !== '' &&
-            <StyledAlert variant="filled" severity="success" onClose={closeNotification} >
-              {viewRoomId}
-            </StyledAlert>
-          }
-        </FlexGrid>
-        <EnterRoomGrid>
-          <TextField
-            value={roomId}
-            error={Boolean(errFlag)}
-            inputProps={{ maxLength: 6, inputMode: 'numeric', pattern: '[0-9]*' }}
-            label="ルームID"
-            variant="outlined"
-            onChange={valChange}
-          />
-          <EntryRoomButton
-            variant="contained"
-            size="large"
-            color="info"
-            onClick={clearRoomId}>
-            クリア
-          </EntryRoomButton>
-          <Link to={{
-            pathname: '/room',
-            state: { key: roomId }
-          }}>
-            <EntryRoomButton
-              variant="contained"
-              color="success"
-              startIcon={<LoginIcon />}
-              disabled={Boolean(disabledFlag)}>
-              入室
-            </EntryRoomButton>
-          </Link>
-        </EnterRoomGrid>
-      </FixedGrid>
+    <Container container justifyContent='center' alignItems='center'>
+      <CenterBox>
+        <Grid container justifyContent='flex-end'>
+          <LoadingButton
+            variant='contained'
+            color='secondary'
+            size='large'
+            onClick={createRoom}
+            loading={loading}
+            disable={loading}
+            loadingPosition='end'
+            endIcon={<BedroomBabyOutlinedIcon />}
+            sx={{ m: 1 }}
+          >
+            ルーム作成
+          </LoadingButton>
+          <LoadingButton
+            variant='contained'
+            color='primary'
+            size='large'
+            onClick={() => enterRoom()}
+            loading={loading}
+            disable={loading}
+            loadingPosition='end'
+            endIcon={<BedroomBabyOutlinedIcon />}
+            sx={{ m: 1 }}
+          >
+            入室
+          </LoadingButton>
+        </Grid>
+      </CenterBox>
     </Container>
   )
 }
