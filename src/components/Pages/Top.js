@@ -95,7 +95,6 @@ export const Top = () => {
     setDisabledFlag(true)
   }
   const decisionRoomId = () => {
-    console.log(roomId)
   }
   return (
     <Container>
