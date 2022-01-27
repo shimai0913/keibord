@@ -18,14 +18,14 @@
         "react"
     ],
     "rules": {
-        "indent": ["error", 2],
-        "no-var": "error",
-        "no-multiple-empty-lines": ["error" , {"max": 1}],
-        "no-trailing-spaces": "error",
-        "space-infix-ops": "error",
-        "dot-notation": "error",
-        "eqeqeq": "error",
-        "arrow-spacing": "error",
+        "indent": ["warn", 2],
+        "no-var": "warn",
+        "no-multiple-empty-lines": ["warn" , {"max": 1}],
+        "no-trailing-spaces": "warn",
+        "space-infix-ops": "warn",
+        "dot-notation": "warn",
+        "eqeqeq": "warn",
+        "arrow-spacing": "warn",
         "no-console": ["warn", { "allow": ["warn", "error"] }],
         "multiline-ternary": "off"
     }

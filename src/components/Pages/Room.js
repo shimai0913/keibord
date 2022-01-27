@@ -1,10 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
-import Draggable from 'react-draggable'
 import firebase from 'firebase/compat/app'
+import Draggable from 'react-draggable'
+// common
 import { db } from 'common/Firebase'
-import { bordWidth, bordHeight, badgeSize } from 'common/theme/index'
+import { screenWidth, screenHeight, badgeSize } from 'common/theme/index'
+// components
+// images
 import FieldImg from 'images/fieldImage.png'
+// mui
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Card from '@mui/material/Card'
@@ -15,8 +20,8 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 
 const Container = styled(Box)`
-  witdh: ${bordWidth}px;
-  height: ${bordHeight}px;
+  width: 100%;
+  height: ${screenHeight}px;
   background: #F4F7FE;
   position: relative;
 `
@@ -48,8 +53,8 @@ const StyledInput = styled(Input)`
 `
 
 const TrashArea = styled(Box)`
-  width: ${bordWidth * 0.1}px;
-  height: ${bordWidth * 0.1}px;
+  width: ${screenWidth * 0.1}px;
+  height: ${screenWidth * 0.1}px;
   padding: 1rem;
   border: 1px dashed #000;
   position: absolute;
@@ -58,21 +63,55 @@ const TrashArea = styled(Box)`
   display: flex;
 `
 
-export const Home = () => {
-  const draggableRef = useRef(false)
-  const isDragRef = useRef(false)
+export const Room = (state) => {
+  const [roomId, setRoomId] = useState(null)
   const [nameText, setNameText] = useState('')
   const [horseBadges, setHorseBadges] = useState({})
+  const roomsRef = useRef(db.collection('rooms'))
+  const horsesRef = useRef(null)
+  const draggableRef = useRef(false)
+  const isDragRef = useRef(false)
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  useEffect(async () => {
+    if (!location.state || await checkRoomOpen(location.state.roomId)) {
+      navigate('/', { replace: true })
+      return
+    }
+    setRoomId(location.state.roomId)
+    getHorseBadges(location.state.roomId)
+  }, [])
+
+  const checkRoomOpen = async (roomId) => {
+    const doc = await roomsRef.current.doc(roomId).get()
+    if (!doc.exists || !doc.data().open) {
+      return true
+    }
+    return false
+  }
 
   useEffect(() => {
-    db.collection('horses').orderBy('createdAt').onSnapshot((snapshot) => {
-      const obj = {}
-      snapshot.forEach((doc) => {
-        obj[doc.id] = doc.data()
+    if (roomId) {
+      horsesRef.current = roomsRef.current.doc(roomId).collection('horses')
+      getHorseBadges()
+    }
+  }, [roomId])
+
+  const getHorseBadges = async () => {
+    if (!horsesRef.current) return
+    try {
+      await horsesRef.current.orderBy('createdAt').onSnapshot(snapshot => {
+        const obj = {}
+        snapshot.forEach(doc => {
+          obj[doc.id] = doc.data()
+        })
+        setHorseBadges(obj)
       })
-      setHorseBadges(obj)
-    })
-  }, [])
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   const onDrag = () => {
     isDragRef.current = true
@@ -90,7 +129,7 @@ export const Home = () => {
           editMode: false
         }
         setHorseBadges({ ...horseBadges, [key]: newObject })
-        await db.collection('horses').doc(key).update(newObject).then(() => {
+        await horsesRef.current.doc(key).update(newObject).then(() => {
           // pass
         }).catch((error) => {
           console.error('error: ', error)
@@ -101,8 +140,8 @@ export const Home = () => {
   }
 
   const onRemove = (x, y) => {
-    if (Math.floor(bordWidth * 0.9) - (badgeSize / 2) < x) {
-      if (Math.floor(bordHeight - (bordWidth * 0.1)) - (badgeSize / 2) < y) {
+    if (Math.floor(screenWidth * 0.9) - (badgeSize / 2) < x) {
+      if (Math.floor(screenHeight - (screenWidth * 0.1)) - (badgeSize / 2) < y) {
         return true
       }
     }
@@ -110,7 +149,7 @@ export const Home = () => {
   }
 
   const deleteBadge = (key) => {
-    db.collection('horses').doc(key).delete()
+    horsesRef.current.doc(key).delete()
   }
 
   const createBadge = () => {
@@ -123,7 +162,7 @@ export const Home = () => {
         editMode: false,
         createdAt: firebase.firestore.Timestamp.fromDate(new Date())
       }
-      db.collection('horses').add(newHorseData).then((docRef) => {
+      horsesRef.current.add(newHorseData).then((docRef) => {
         setHorseBadges({ ...horseBadges, [docRef.id]: newHorseData })
       }).catch((error) => {
         console.error('error: ', error)
@@ -151,7 +190,7 @@ export const Home = () => {
     }
     setHorseBadges({ ...horseBadges, [key]: newObject })
     setNameText('')
-    await db.collection('horses').doc(key).update(newObject).then(() => {
+    await horsesRef.current.doc(key).update(newObject).then(() => {
       // pass
     }).catch((error) => {
       console.error('error: ', error)
@@ -171,9 +210,10 @@ export const Home = () => {
           image={FieldImg}
         />
       </Card>
-      <IconButton color='primary' onClick={createBadge}>
+      <IconButton color='secondary' onClick={createBadge}>
         <AddCircleOutlineIcon />
       </IconButton>
+      <>ルームID: {roomId}</>
       <Grid container>
         {Object.entries(horseBadges).map(([key, horseData]) => {
           return (
@@ -210,8 +250,9 @@ export const Home = () => {
           )
         })}
       </Grid>
+
       <TrashArea component='span'>
-        <DeleteOutlineIcon color='primary' fontSize='large' sx={{ m: 'auto' }} />
+        <DeleteOutlineIcon color='secondary' fontSize='large' sx={{ m: 'auto' }} />
       </TrashArea>
     </Container>
   )
