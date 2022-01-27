@@ -10,6 +10,8 @@ import firebase from 'firebase/compat/app'
 import Button from '@mui/material/Button'
 import Grid from '@mui/material/Grid'
 import Alert from '@mui/material/Alert'
+import TextField from '@mui/material/TextField'
+import LoginIcon from '@mui/icons-material/Login'
 const Container = styled(Box)`
   witdh: ${bordWidth}px;
   height: ${bordHeight}px;
@@ -27,18 +29,31 @@ const StyledCard = styled(Card)`
   padding: 0;
   width: 200px;
   box-shadow: 20px 20px 15px -10px!important;
+  margin-right: 1rem;
 `
 const StyledButton = styled(Button)`
   width: 200px;
   height: 100px;
 `
+const EntryRoomButton = styled(Button)`
+  height: 56px;
+  margin-left: 2rem!important;
+`
 const FixedGrid = styled(Grid)`
   position: fixed;
-  top: 14%;
-  left: 70%;
+  top: 10%;
+  left: 55%;
+`
+const EnterRoomGrid = styled(Grid)`
+  margin-top: 2rem;
+  padding: 1rem 1rem 1rem 0;
+  border-radius: 10px;
+`
+const FlexGrid = styled(Grid)`
+  display: flex;
 `
 const StyledAlert = styled(Alert)`
-  margin-top: 2rem;
+  margin-top: 3rem;
   with: auto;
 `
 export const Top = () => {
@@ -57,6 +72,31 @@ export const Top = () => {
   const closeNotification = () => {
     setViewRoomId('')
   }
+  const [roomId, setRoomId] = useState('')
+  const [errFlag, setErrFlag] = useState(false)
+  const [disabledFlag, setDisabledFlag] = useState(true)
+  const valChange = (e) => {
+    const val = e.target.value
+    const regex = /^\d{6}$/
+    const result = regex.test(val)
+    if (result) {
+      //  validation通過
+      setErrFlag(false)
+      setDisabledFlag(false)
+    } else {
+      setErrFlag(true)
+      setDisabledFlag(true)
+    }
+    setRoomId(val)
+  }
+  const clearRoomId = () => {
+    setRoomId('')
+    setErrFlag(false)
+    setDisabledFlag(true)
+  }
+  const decisionRoomId = () => {
+    console.log(roomId)
+  }
   return (
     <Container>
       <Card>
@@ -66,14 +106,41 @@ export const Top = () => {
         />
       </Card>
       <FixedGrid>
-        <StyledCard>
-          <StyledButton variant="contained" onClick={createRoom}>ルーム作成</StyledButton>
-        </StyledCard>
-        {viewRoomId !== '' &&
-          <StyledAlert variant="filled" severity="success" onClose={closeNotification} >
-            {viewRoomId}
-          </StyledAlert>
-        }
+        <FlexGrid>
+          <StyledCard>
+            <StyledButton variant="contained" onClick={createRoom}>ルーム作成</StyledButton>
+          </StyledCard>
+          {viewRoomId !== '' &&
+            <StyledAlert variant="filled" severity="success" onClose={closeNotification} >
+              {viewRoomId}
+            </StyledAlert>
+          }
+        </FlexGrid>
+        <EnterRoomGrid>
+          <TextField
+            value={roomId}
+            error={Boolean(errFlag)}
+            inputProps={{ maxLength: 6, inputMode: 'numeric', pattern: '[0-9]*' }}
+            label="ルームID"
+            variant="outlined"
+            onChange={valChange}
+          />
+          <EntryRoomButton
+            variant="contained"
+            size="large"
+            color="info"
+            onClick={clearRoomId}>
+            クリア
+          </EntryRoomButton>
+          <EntryRoomButton
+            variant="contained"
+            color="success"
+            startIcon={<LoginIcon />}
+            disabled={Boolean(disabledFlag)}
+            onClick={decisionRoomId}>
+            入室
+          </EntryRoomButton>
+        </EnterRoomGrid>
       </FixedGrid>
     </Container>
   )
