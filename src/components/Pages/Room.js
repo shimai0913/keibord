@@ -63,7 +63,7 @@ const TrashArea = styled(Box)`
   display: flex;
 `
 
-export const Room = (state) => {
+export const Room = () => {
   const [roomId, setRoomId] = useState(null)
   const [nameText, setNameText] = useState('')
   const [horseBadges, setHorseBadges] = useState({})
@@ -129,11 +129,7 @@ export const Room = (state) => {
           editMode: false
         }
         setHorseBadges({ ...horseBadges, [key]: newObject })
-        await horsesRef.current.doc(key).update(newObject).then(() => {
-          // pass
-        }).catch((error) => {
-          console.error('error: ', error)
-        })
+        await horsesRef.current.doc(key).update(newObject).catch((e) => console.error(e))
       }
     }
     isDragRef.current = false
@@ -152,7 +148,7 @@ export const Room = (state) => {
     horsesRef.current.doc(key).delete()
   }
 
-  const createBadge = () => {
+  const createBadge = async () => {
     const badgesesLength = Object.keys(horseBadges).length
     if (badgesesLength < 18) {
       const newHorseData = {
@@ -162,11 +158,8 @@ export const Room = (state) => {
         editMode: false,
         createdAt: firebase.firestore.Timestamp.fromDate(new Date())
       }
-      horsesRef.current.add(newHorseData).then((docRef) => {
-        setHorseBadges({ ...horseBadges, [docRef.id]: newHorseData })
-      }).catch((error) => {
-        console.error('error: ', error)
-      })
+      const docRef = await horsesRef.current.add(newHorseData).catch((e) => console.error(e))
+      setHorseBadges({ ...horseBadges, [docRef.id]: newHorseData })
     }
   }
 
@@ -183,22 +176,19 @@ export const Room = (state) => {
 
   const editModeOff = async (key) => {
     const newObject = {
-      name: nameText,
+      name: nameText || 'うま',
       x: horseBadges[key].x,
       y: horseBadges[key].y,
       editMode: false
     }
     setHorseBadges({ ...horseBadges, [key]: newObject })
     setNameText('')
-    await horsesRef.current.doc(key).update(newObject).then(() => {
-      // pass
-    }).catch((error) => {
-      console.error('error: ', error)
-    })
+    await horsesRef.current.doc(key).update(newObject).catch((e) => console.error(e))
   }
 
   const handleChange = (e) => {
     const val = e.target.value
+    if (val.length > 9) return
     setNameText(val)
   }
 
