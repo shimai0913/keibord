@@ -7,13 +7,11 @@ import Draggable from 'react-draggable'
 import { db } from 'common/Firebase'
 import { screenWidth, screenHeight, badgeSize } from 'common/theme/index'
 // components
+import { Bord } from 'components/Parts/Bord'
 // images
-import Tokyo2400 from 'images/racecourseTokyo2400.png'
 // mui
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
-import Card from '@mui/material/Card'
-import CardMedia from '@mui/material/CardMedia'
 import Input from '@mui/material/Input'
 import IconButton from '@mui/material/IconButton'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
@@ -196,12 +194,7 @@ export const Room = () => {
 
   return (
     <Container>
-      <Card>
-        <CardMedia
-          component='img'
-          image={Tokyo2400}
-        />
-      </Card>
+      <Bord />
       <IconButton color='secondary' onClick={createBadge}>
         <AddCircleOutlineIcon />
       </IconButton>
