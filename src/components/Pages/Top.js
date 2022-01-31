@@ -13,7 +13,9 @@ import BgImg from 'images/horse.jpg'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import LoadingButton from '@mui/lab/LoadingButton'
+import TextField from '@mui/material/TextField'
 import BedroomBabyOutlinedIcon from '@mui/icons-material/BedroomBabyOutlined'
+import Alert from '@mui/material/Alert'
 
 const Container = styled(Grid)`
   width: 100%;
@@ -42,7 +44,7 @@ const Container = styled(Grid)`
 const CenterBox = styled(Box)`
   width: 80%;
   height: 80%;
-  padding: 10%;
+  padding: 6%;
   // padding-bottom: 30%;
   // padding-left: 50%;
   box-sizing: border-box;
@@ -54,11 +56,21 @@ const CenterBox = styled(Box)`
   background-position: 100% 100%;
   background-size: cover;
 `
+const ErrAlert = styled(Alert)`
+  max-width: 300px;
+  float: right;
+  margin-bottom: 1rem;
+  margin-top: 1rem;
+`
 
 export const Top = () => {
   const roomsRef = useRef(db.collection('rooms'))
   const [loading, setLoading] = useState(false)
   const [roomId, setRoomId] = useState(null)
+  const [inputRoomId, setInputRoomId] = useState(null)
+  const [roomIdErrFlag, setRoomIdErrFlag] = useState(false)
+  const [entryButtonFlag, setEntryButtonFlag] = useState(true)
+  const [notApplicableFlag, setNotApplicableFlag] = useState(false)
   const navigate = useNavigate()
 
   const createRoom = async () => {
@@ -94,9 +106,22 @@ export const Top = () => {
       setLoading(false)
       if (doc.exists && doc.data().open) {
         navigate(`/Room/${roomId}`, { state: { roomId: roomId } })
+      } else {
+        setNotApplicableFlag(true)
       }
     } catch (error) {
       console.error('error:', error)
+    }
+  }
+  const changeRoomId = (e) => {
+    const regex = /^\d{6}$/
+    const val = e.target.value
+    setInputRoomId(e.target.value)
+    if (val === '') {
+      setRoomIdErrFlag(false)
+    } else {
+      regex.test(val) ? setRoomIdErrFlag(false) : setRoomIdErrFlag(true)
+      regex.test(val) ? setEntryButtonFlag(false) : setEntryButtonFlag(true)
     }
   }
 
@@ -110,20 +135,35 @@ export const Top = () => {
             size='large'
             onClick={createRoom}
             loading={loading}
-            disable={loading}
+            disabled={loading}
             loadingPosition='end'
             endIcon={<BedroomBabyOutlinedIcon />}
             sx={{ m: 1 }}
           >
             ルーム作成
           </LoadingButton>
+        </Grid>
+        {notApplicableFlag &&
+          <ErrAlert variant="outlined" severity="error">
+            ルームが存在しません。
+          </ErrAlert>
+        }
+        <Grid container justifyContent='flex-end'>
+          <TextField
+            inputProps={{ maxLength: 6 }}
+            error={roomIdErrFlag}
+            onChange={changeRoomId}
+            id="outlined-basic"
+            label="ルームID"
+            variant="outlined"
+          />
           <LoadingButton
             variant='contained'
             color='primary'
             size='large'
-            onClick={() => enterRoom()}
+            onClick={() => enterRoom(inputRoomId)}
             loading={loading}
-            disable={loading}
+            disabled={entryButtonFlag}
             loadingPosition='end'
             endIcon={<BedroomBabyOutlinedIcon />}
             sx={{ m: 1 }}
