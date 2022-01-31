@@ -8,7 +8,7 @@ import { db } from 'common/Firebase'
 import { screenWidth, screenHeight, badgeSize } from 'common/theme/index'
 // components
 // images
-import FieldImg from 'images/fieldImage.png'
+import Tokyo2400 from 'images/racecourseTokyo2400.png'
 // mui
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
@@ -199,7 +199,7 @@ export const Room = () => {
       <Card>
         <CardMedia
           component='img'
-          image={FieldImg}
+          image={Tokyo2400}
         />
       </Card>
       <IconButton color='secondary' onClick={createBadge}>
