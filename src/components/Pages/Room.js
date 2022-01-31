@@ -31,13 +31,14 @@ const Badge = styled(Box)`
   height: ${badgeSize}px;
   font-size: 0.5rem;
   color: #fff;
-  // background: #1A1667;
   border-radius: 50%;
   text-align: center;
   padding: 0.5rem;
   box-sizing: border-box;
   display: flex;
   align-items: center;
+  position: fixed;
+  box-shadow: inset -1px -5px 10px #DBDCFE;
 `
 
 const HorseName = styled.div`
@@ -151,10 +152,11 @@ export const Room = () => {
   const createBadge = async () => {
     const badgesesLength = Object.keys(horseBadges).length
     if (badgesesLength < 18) {
+      // 初期配置x, yは乱数
       const newHorseData = {
         name: 'うま',
-        x: 0,
-        y: 0,
+        x: Math.floor(Math.random() * 500),
+        y: Math.floor(Math.random() * 500),
         editMode: false,
         createdAt: firebase.firestore.Timestamp.fromDate(new Date())
       }
@@ -240,7 +242,6 @@ export const Room = () => {
           )
         })}
       </Grid>
-
       <TrashArea component='span'>
         <DeleteOutlineIcon color='secondary' fontSize='large' sx={{ m: 'auto' }} />
       </TrashArea>
