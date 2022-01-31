@@ -13,9 +13,9 @@ import BgImg from 'images/horse.jpg'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import LoadingButton from '@mui/lab/LoadingButton'
-import TextField from '@mui/material/TextField'
 import BedroomBabyOutlinedIcon from '@mui/icons-material/BedroomBabyOutlined'
 import Alert from '@mui/material/Alert'
+import EnterRoomDialog from './EnterRoomDialog'
 
 const Container = styled(Grid)`
   width: 100%;
@@ -67,10 +67,8 @@ export const Top = () => {
   const roomsRef = useRef(db.collection('rooms'))
   const [loading, setLoading] = useState(false)
   const [roomId, setRoomId] = useState(null)
-  const [inputRoomId, setInputRoomId] = useState(null)
-  const [roomIdErrFlag, setRoomIdErrFlag] = useState(false)
-  const [entryButtonFlag, setEntryButtonFlag] = useState(true)
   const [notApplicableFlag, setNotApplicableFlag] = useState(false)
+  const [closeRoomFlag, setCloseRoomFlag] = useState(false)
   const navigate = useNavigate()
 
   const createRoom = async () => {
@@ -103,25 +101,26 @@ export const Top = () => {
     try {
       setLoading(true)
       const doc = await roomsRef.current.doc(roomId).get()
-      setLoading(false)
-      if (doc.exists && doc.data().open) {
-        navigate(`/Room/${roomId}`, { state: { roomId: roomId } })
-      } else {
+      if (!doc.exists) {
         setNotApplicableFlag(true)
+        setTimeout(function () {
+          setNotApplicableFlag(false)
+        }, 3000)
+        setLoading(false)
+        return
       }
+      if (!doc.data().open) {
+        setLoading(false)
+        setCloseRoomFlag(true)
+        setTimeout(function () {
+          setCloseRoomFlag(false)
+        }, 3000)
+        return
+      }
+      setLoading(false)
+      navigate(`/Room/${roomId}`, { state: { roomId: roomId } })
     } catch (error) {
       console.error('error:', error)
-    }
-  }
-  const changeRoomId = (e) => {
-    const regex = /^\d{6}$/
-    const val = e.target.value
-    setInputRoomId(e.target.value)
-    if (val === '') {
-      setRoomIdErrFlag(false)
-    } else {
-      regex.test(val) ? setRoomIdErrFlag(false) : setRoomIdErrFlag(true)
-      regex.test(val) ? setEntryButtonFlag(false) : setEntryButtonFlag(true)
     }
   }
 
@@ -148,28 +147,13 @@ export const Top = () => {
             ルームが存在しません。
           </ErrAlert>
         }
+        {closeRoomFlag &&
+          <ErrAlert variant="outlined" severity="error">
+            ルームが閉まっています。
+          </ErrAlert>
+        }
         <Grid container justifyContent='flex-end'>
-          <TextField
-            inputProps={{ maxLength: 6 }}
-            error={roomIdErrFlag}
-            onChange={changeRoomId}
-            id="outlined-basic"
-            label="ルームID"
-            variant="outlined"
-          />
-          <LoadingButton
-            variant='contained'
-            color='primary'
-            size='large'
-            onClick={() => enterRoom(inputRoomId)}
-            loading={loading}
-            disabled={entryButtonFlag}
-            loadingPosition='end'
-            endIcon={<BedroomBabyOutlinedIcon />}
-            sx={{ m: 1 }}
-          >
-            入室
-          </LoadingButton>
+          <EnterRoomDialog enterRoom={enterRoom} loading={loading} />
         </Grid>
       </CenterBox>
     </Container>
