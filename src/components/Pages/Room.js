@@ -74,21 +74,13 @@ export const Room = () => {
   const navigate = useNavigate()
 
   useEffect(async () => {
-    if (!location.state || await checkRoomOpen(location.state.roomId)) {
+    if (!location.state) {
       navigate('/', { replace: true })
       return
     }
     setRoomId(location.state.roomId)
     getHorseBadges(location.state.roomId)
   }, [])
-
-  const checkRoomOpen = async (roomId) => {
-    const doc = await roomsRef.current.doc(roomId).get()
-    if (!doc.exists || !doc.data().open) {
-      return true
-    }
-    return false
-  }
 
   useEffect(() => {
     if (roomId) {

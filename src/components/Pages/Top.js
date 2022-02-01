@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import firebase from 'firebase/compat/app'
@@ -7,6 +7,7 @@ import { db } from 'common/Firebase'
 import { zeroPadding, sleep } from 'common/BaseFunc'
 import { screenHeight } from 'common/theme/index'
 // components
+import EnterRoomDialog from 'components/Parts/EnterRoomDialog'
 // images
 import BgImg from 'images/horse.jpg'
 // mui
@@ -42,7 +43,7 @@ const Container = styled(Grid)`
 const CenterBox = styled(Box)`
   width: 80%;
   height: 80%;
-  padding: 10%;
+  padding: 6%;
   // padding-bottom: 30%;
   // padding-left: 50%;
   box-sizing: border-box;
@@ -58,46 +59,35 @@ const CenterBox = styled(Box)`
 export const Top = () => {
   const roomsRef = useRef(db.collection('rooms'))
   const [loading, setLoading] = useState(false)
-  const [roomId, setRoomId] = useState(null)
+  const [open, setOpen] = useState(false)
   const navigate = useNavigate()
 
   const createRoom = async () => {
     try {
       setLoading(true)
-      await sleep(3000)
       const querySnapshot = await roomsRef.current.limit(1).orderBy('createdAt', 'desc').get()
       const newRoomId = querySnapshot.docs.map(doc => zeroPadding(Number(doc.id) + 1, 6)).join(',')
       const newData = {
         open: true,
         createdAt: firebase.firestore.Timestamp.fromDate(new Date())
       }
-      setRoomId(newRoomId)
       roomsRef.current.doc(newRoomId || '000001').set(newData)
+      setLoading(false)
+      enterRoom(newRoomId)
     } catch (error) {
       console.error('error:', error)
-    } finally {
-      setLoading(false)
     }
   }
 
-  useEffect(() => {
-    if (roomId) {
-      enterRoom(roomId)
-    }
-  }, [roomId])
-
   const enterRoom = async (roomId) => {
-    if (!roomId) return
-    try {
-      setLoading(true)
-      const doc = await roomsRef.current.doc(roomId).get()
-      setLoading(false)
-      if (doc.exists && doc.data().open) {
-        navigate(`/Room/${roomId}`, { state: { roomId: roomId } })
-      }
-    } catch (error) {
-      console.error('error:', error)
-    }
+    if (!roomId) return false
+    setLoading(true)
+    const doc = await roomsRef.current.doc(roomId).get().catch(e => console.error(e))
+    // 仮sleep
+    await sleep(3000)
+    setLoading(false)
+    if (!doc.exists || !doc.data().open) return false
+    navigate(`/Room/${roomId}`, { state: { roomId: roomId } })
   }
 
   return (
@@ -110,7 +100,7 @@ export const Top = () => {
             size='large'
             onClick={createRoom}
             loading={loading}
-            disable={loading}
+            disabled={loading}
             loadingPosition='end'
             endIcon={<BedroomBabyOutlinedIcon />}
             sx={{ m: 1 }}
@@ -121,15 +111,20 @@ export const Top = () => {
             variant='contained'
             color='primary'
             size='large'
-            onClick={() => enterRoom()}
+            onClick={() => setOpen(true)}
             loading={loading}
-            disable={loading}
+            disabled={loading}
             loadingPosition='end'
             endIcon={<BedroomBabyOutlinedIcon />}
             sx={{ m: 1 }}
           >
             入室
           </LoadingButton>
+          <EnterRoomDialog
+            open={open}
+            onClose={() => setOpen(false)}
+            enterRoom={enterRoom}
+          />
         </Grid>
       </CenterBox>
     </Container>
