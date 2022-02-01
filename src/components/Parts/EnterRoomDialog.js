@@ -41,10 +41,11 @@ const EnterRoomDialog = ({ open, onClose, enterRoom }) => {
   }, [targetRoomId])
 
   const changeField = (event, index) => {
-    const newVal = event.target.value
+    const newVal = event.key === 'Backspace' ? '' : event.key
     if (isNaN(newVal)) return
     setValues(values.map((value, i) => (index === i ? newVal : value)))
     setForcus(index + 1)
+    if (event.key === 'Backspace') setForcus(index - 1)
   }
 
   const enterTargetRoom = async (roomId) => {
@@ -64,7 +65,7 @@ const EnterRoomDialog = ({ open, onClose, enterRoom }) => {
             inputRef={input => input && index === forcus && input.focus()}
             color='secondary'
             inputProps={{ maxLength: 1 }}
-            onChange={(e) => changeField(e, index)}
+            onKeyDown={(e) => changeField(e, index)}
           />
         ))}
       </DialogContent>
