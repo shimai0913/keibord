@@ -7,6 +7,7 @@ import { db } from 'common/Firebase'
 import { zeroPadding, sleep } from 'common/BaseFunc'
 import { screenHeight } from 'common/theme/index'
 // components
+import EnterRoomDialog from './EnterRoomDialog'
 // images
 import BgImg from 'images/horse.jpg'
 // mui
@@ -14,8 +15,6 @@ import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import LoadingButton from '@mui/lab/LoadingButton'
 import BedroomBabyOutlinedIcon from '@mui/icons-material/BedroomBabyOutlined'
-import Alert from '@mui/material/Alert'
-import EnterRoomDialog from './EnterRoomDialog'
 
 const Container = styled(Grid)`
   width: 100%;
@@ -55,12 +54,6 @@ const CenterBox = styled(Box)`
   background-repeat: no-repeat;
   background-position: 100% 100%;
   background-size: cover;
-`
-const ErrAlert = styled(Alert)`
-  max-width: 300px;
-  float: right;
-  margin-bottom: 1rem;
-  margin-top: 1rem;
 `
 
 export const Top = () => {
@@ -123,7 +116,6 @@ export const Top = () => {
       console.error('error:', error)
     }
   }
-
   return (
     <Container container justifyContent='center' alignItems='center'>
       <CenterBox>
@@ -141,19 +133,9 @@ export const Top = () => {
           >
             ルーム作成
           </LoadingButton>
+          <EnterRoomDialog enterRoom={enterRoom} notApplicableFlag={notApplicableFlag} closeRoomFlag={closeRoomFlag} />
         </Grid>
-        {notApplicableFlag &&
-          <ErrAlert variant="outlined" severity="error">
-            ルームが存在しません。
-          </ErrAlert>
-        }
-        {closeRoomFlag &&
-          <ErrAlert variant="outlined" severity="error">
-            ルームが閉まっています。
-          </ErrAlert>
-        }
         <Grid container justifyContent='flex-end'>
-          <EnterRoomDialog enterRoom={enterRoom} loading={loading} />
         </Grid>
       </CenterBox>
     </Container>

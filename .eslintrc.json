@@ -27,6 +27,7 @@
         "eqeqeq": "warn",
         "arrow-spacing": "warn",
         "no-console": ["warn", { "allow": ["warn", "error"] }],
-        "multiline-ternary": "off"
+        "multiline-ternary": "off",
+        "react/prop-types": "off"
     }
 }
