@@ -16,6 +16,7 @@ import Input from '@mui/material/Input'
 import IconButton from '@mui/material/IconButton'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
+import Button from '@mui/material/Button'
 
 const Container = styled(Box)`
   width: 100%;
@@ -60,6 +61,9 @@ const TrashArea = styled(Box)`
   right: 0;
   bottom: 0;
   display: flex;
+`
+const ExitButton = styled(Button)`
+  margin-left: 2rem!important;
 `
 
 export const Room = () => {
@@ -183,6 +187,9 @@ export const Room = () => {
     if (val.length > 9) return
     setNameText(val)
   }
+  const exit = () => {
+    navigate('/')
+  }
 
   return (
     <Container>
@@ -191,6 +198,7 @@ export const Room = () => {
         <AddCircleOutlineIcon />
       </IconButton>
       <>ルームID: {roomId}</>
+      <ExitButton variant="contained" onClick={exit}>退室</ExitButton>
       <Grid container>
         {Object.entries(horseBadges).map(([key, horseData]) => {
           return (
