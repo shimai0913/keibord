@@ -23,7 +23,7 @@ const StyledTextField = styled(TextField)`
   margin-right: 1rem! important;
 `
 
-const EnterRoomDialog = ({ open, onClose, enterRoom }) => {
+export const EnterRoomDialog = ({ open, onClose, enterRoom }) => {
   const initial = [null, null, null, null, null, null]
   const [targetRoomId, setTargetRoomId] = useState(initial)
   const [values, setValues] = useState(initial)
@@ -85,4 +85,3 @@ const EnterRoomDialog = ({ open, onClose, enterRoom }) => {
     </Dialog>
   )
 }
-export default EnterRoomDialog

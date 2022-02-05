@@ -17,18 +17,17 @@ import IconButton from '@mui/material/IconButton'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import Button from '@mui/material/Button'
+import Typography from '@mui/material/Typography'
 
 const Container = styled(Box)`
   width: 100%;
   height: ${screenHeight}px;
-  background: #F4F7FE;
   position: relative;
 `
 
 const Badge = styled(Box)`
   width: ${badgeSize}px;
   height: ${badgeSize}px;
-  font-size: 0.5rem;
   color: #fff;
   border-radius: 50%;
   text-align: center;
@@ -40,7 +39,7 @@ const Badge = styled(Box)`
   box-shadow: inset -1px -5px 10px #DBDCFE;
 `
 
-const HorseName = styled.div`
+const HorseName = styled(Typography)`
   width: 100%;
 `
 
@@ -61,9 +60,6 @@ const TrashArea = styled(Box)`
   right: 0;
   bottom: 0;
   display: flex;
-`
-const ExitButton = styled(Button)`
-  margin-left: 2rem!important;
 `
 
 export const Room = () => {
@@ -187,6 +183,7 @@ export const Room = () => {
     if (val.length > 9) return
     setNameText(val)
   }
+
   const exit = () => {
     navigate('/')
   }
@@ -197,8 +194,15 @@ export const Room = () => {
       <IconButton color='secondary' onClick={createBadge}>
         <AddCircleOutlineIcon />
       </IconButton>
-      <>ルームID: {roomId}</>
-      <ExitButton variant="contained" onClick={exit}>退室</ExitButton>
+      <Typography>ルームID: {roomId}</Typography>
+      <Button
+        variant='contained'
+        color='primary'
+        size='large'
+        onClick={exit}
+      >
+        退室
+      </Button>
       <Grid container>
         {Object.entries(horseBadges).map(([key, horseData]) => {
           return (

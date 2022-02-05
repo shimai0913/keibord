@@ -7,7 +7,7 @@ import { db } from 'common/Firebase'
 import { zeroPadding, sleep } from 'common/BaseFunc'
 import { screenHeight } from 'common/theme/index'
 // components
-import EnterRoomDialog from 'components/Parts/EnterRoomDialog'
+import { EnterRoomDialog } from 'components/Parts/EnterRoomDialog'
 // images
 import BgImg from 'images/horse.jpg'
 // mui
@@ -19,7 +19,6 @@ import BedroomBabyOutlinedIcon from '@mui/icons-material/BedroomBabyOutlined'
 const Container = styled(Grid)`
   width: 100%;
   height: ${screenHeight}px;
-  background: #9DBCBE;
   position: relative;
   background-image: url(${BgImg});
   background-repeat: no-repeat;
@@ -43,12 +42,9 @@ const Container = styled(Grid)`
 const CenterBox = styled(Box)`
   width: 80%;
   height: 80%;
-  padding: 6%;
-  // padding-bottom: 30%;
-  // padding-left: 50%;
+  padding: 10%;
   box-sizing: border-box;
   border: 4px rgba(29,29,27,.15) solid;
-  box-shadow: inset 0px 2px 0px 0px rgb(255 255 255 / 15%), 0px 3px 0px 0px rgb(255 255 255 / 15%);
   border-radius: 12px;
   background-image: url(${BgImg});
   background-repeat: no-repeat;
