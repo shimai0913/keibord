@@ -19,8 +19,8 @@ const CourseMap = {
 }
 
 const TriangleLeft = styled.div`
-  width: 0;
-  height: 0;
+  width: auto;
+  height: auto;
   border-top: 30px solid transparent;
   border-right: 30px solid #000;
   border-bottom: 30px solid transparent;
